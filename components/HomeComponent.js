@@ -1,85 +1,96 @@
 import React, {Component} from 'react';
-import Directory from './DirectoryComponent';
-import Home from './HomeComponent';
-import Contact from './ContactComponent';
-import Order from './OrderComponent';
-import { connect } from 'react-redux';
-import { baseUrl } from '../shared/baseUrl';
+import { View, ScrollView, Text, FlatList} from 'react-native';
+import {Card, Tile} from 'react-native-elements';
+import {connect} from 'react-redux';
+import {baseUrl} from '../shared/baseUrl';
 import Loading from './LoadingComponent';
+import * as Animatable from 'react-native-animatable';
+
 
 const mapStateToProps = state => {
     return {
-        products: state.products,
         carousels: state.carousels
     };
 };
-function RenderItem(props) {
-    const {item} = props;
 
-    if (props.isLoading) {
-        return <Loading />;
-    }
-    if (props.errMess) {
-        return (
-            <View>
-                <Text>{props.errMess}</Text>
-            </View>
-        );
-    }
-
-    if (item) {
-        return (
-            <Card
-                featuredTitle={item.name}
-                image={{uri: baseUrl + item.image}}>
-            
-                <Text style={{margin: 10}}>
-                    {item.description}
-                </Text>
-            </Card>
-        );
-    }
-    return <View />;
-}
 
 class Home extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            scaleValue: new Animated.Value(0)
-        };
-    }
-    animate() {
-        Animated.timing(
-            this.state.scaleValue,
-            {
-                toValue: 1,
-                duration: 1500,
-                useNativeDriver: true
-            }
-        ).start();
-    }
-
-    componentDidMount() {
-        this.animate();
-    }
+    
 
     static navigationOptions = {
         title: 'Home'
-    }
-
-    render() {
+    };
+  render () {
+      const renderHome = ({item}) => {
         return (
-            <Animated.ScrollView style={{transform: [{scale: this.state.scaleValue}]}}>
-                 <RenderItem
-                    item={this.props.carousels.carousels.filter(carousel=> carousel.featured)[0]}
-                    isLoading={this.props.carousels.isLoading}
-                    errMess={this.props.carousels.errMess}
-                />
-            </Animated.ScrollView>
+            <ListItem
+                title={item.name}
+                subtitle={item.tagline}
+                leftAvatar={{source: {uri: baseUrl + item.image}}}
+            />
         );
-    }
+    };
+    if (this.props.carousels.isLoading) {
+        return (
+            <ScrollView>
+               <Animatable.View animation='fadeInDown' duration={2000} delay={1000}>
+                        <Mission />
+                        <Card
+                            title="Community Partners">
+                            <Text>{this.props.carousels.errMess}</Text>
+                        </Card>
+                    </Animatable.View>
+                </ScrollView>
+            );
+        }
+        return (
+            <ScrollView>
+                <Animatable.View animation='fadeInDown' duration={2000} delay={1000}>
+                    <Mission />
+                    <Card
+                        title="Community Partners">
+                        <FlatList
+                            data={this.props.carousels.carousels}
+                            renderItem={renderHome}
+                            keyExtractor={item=>item.id.toString()}
+                        />
+                    </Card>
+                </Animatable.View>
+    </ScrollView >
+    );
+  }
+}
+ function Mission() {
+   
+    return (
+        <Card title= "Our Mission">
+          <Text style = {{margin:10}}>
+          We present a curated database of the best campsites in the vast woods and backcountry of the World Wide Web Wilderness. 
+          We increase access to adventure for the public while promoting safe and respectful use of resources. 
+          The expert wilderness trekkers on our staff personally verify each campsite to make sure that they are up to our standards. 
+          We also present a platform for campers to share reviews on campsites they have visited with each other.
+          </Text>
+          </Card>
+    );
 }
 
 
+ 
 export default connect(mapStateToProps)(Home);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -3,7 +3,7 @@ export const CAROUSELS = [
         id: 0,
         name: 'Welcome Home',
         image: '/assets/images/tea-lover.jpg',
-        featured: false,
+        featured: true,
         tagline: 'Welcome home tea lovers'
        
     },
@@ -11,7 +11,7 @@ export const CAROUSELS = [
       id: 1,
       name: 'Baked Goods',
       image: '/assets/images/tea-treats.jpg',
-      featured: false,
+      featured: true,
       tagline: 'We bake delicious treats everyday'
       
     },

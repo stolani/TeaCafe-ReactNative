@@ -18,6 +18,8 @@ import {createDrawerNavigator, DrawerItems} from 'react-navigation-drawer';
 import {createAppContainer} from 'react-navigation';
 import {Icon} from 'react-native-elements';
 import SafeAreaView from 'react-native-safe-area-view';
+import NetInfo from '@react-native-community/netinfo';
+import {connect} from 'react-redux';
 import {
     fetchProducts,
     fetchCarousels,
@@ -30,9 +32,17 @@ import {
 
   const DirectoryNavigator = createStackNavigator (
     {
-      Directory: {
-        screen: Directory,
-        navigationOptions: ({navigation}) => ({
+      Directory: { screen: Directory},
+    },
+  {
+    defaultNavigationOptions: ({navigation}) => ({
+      headerStyle: {
+        backgroundColor: '#5637DD',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        color: '#fff',
+      },
           headerLeft: (
             <Icon
               name="list"
@@ -40,11 +50,11 @@ import {
               iconStyle={styles.stackIcon}
               onPress={() => navigation.toggleDrawer ()}
             />
-          ),
-        }),
-    }
-     }
-    );
+            ),
+          }),
+        }
+      );
+      
     const HomeNavigator = createStackNavigator (
         {
           Home: {screen: Home},
@@ -191,8 +201,51 @@ import {
   
   class Main extends Component {
     componentDidMount () {
-      this.props.fectchProducts ();
+      this.props.fetchProducts ();
       this.props.fetchCarousels ();
+      this.showNetInfo();
+      this.unsubscribeNetInfo = NetInfo.addEventListener (connectionInfo => {
+      this.handleConnectivityChange (connectionInfo);
+      });
+
+  }
+  showNetInfo = async() => {
+    const connectionInfo = await NetInfo.fetch()
+            Platform.OS === 'ios'
+              ? Alert.alert (
+                  'Initial Network Connectivity Type:',
+                  connectionInfo.type
+                )
+              : ToastAndroid.show (
+                  'Initial Network Connectivity Type: ' + connectionInfo.type,
+                  ToastAndroid.LONG
+                );
+          };
+          
+        componentWillUnmount() {
+          this.unsubscribeNetInfo();
+      }
+    
+      handleConnectivityChange = connectionInfo => {
+          let connectionMsg = 'You are now connected to an active network.';
+          switch (connectionInfo.type) {
+              case 'none':
+                  connectionMsg = 'No network connection is active.';
+                  break;
+              case 'unknown':
+                  connectionMsg = 'The network connection state is now unknown.';
+                  break;
+              case 'cellular':
+                  connectionMsg = 'You are now connected to a cellular network.';
+                  break;
+              case 'wifi':
+                  connectionMsg = 'You are now connected to a WiFi network.';
+                  break;
+          }
+          (Platform.OS === 'ios')
+              ? Alert.alert('Connection change:', connectionMsg)
+              : ToastAndroid.show(connectionMsg, ToastAndroid.LONG);
+      }
 
   render () {
     return (
@@ -207,9 +260,8 @@ import {
         <AppNavigator />
       </View>
     );
-  };
-}
-}
+  }
+    }
 
 
   const styles = StyleSheet.create ({
